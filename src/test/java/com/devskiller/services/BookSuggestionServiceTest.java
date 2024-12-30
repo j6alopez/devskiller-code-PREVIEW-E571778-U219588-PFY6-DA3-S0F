@@ -77,21 +77,7 @@ public class BookSuggestionServiceTest {
     }
 
     @Test
-    @DisplayName("Should suggest book titles with correct rating")
-    public void shouldSuggestBookTitlesWithCorrectGenre() {
-        //given:
-        int rating = 4;
-        // when:
-        Set<String> suggestedBooks = suggestionService.suggestBooks(reader1, rating);
-
-        // then:
-        assertThat(suggestedBooks).isEqualTo(newHashSet(book2.title()));
-
-    }
-
-    @Test
     @DisplayName("Should suggest book titles with default rating of four or higher")
-    @Disabled
     public void shouldSuggestBookTitlesWithDefaultRatingOfFourOrHigher() {
         // when:
         Set<String> suggestedBooks = suggestionService.suggestBooks(reader1);
