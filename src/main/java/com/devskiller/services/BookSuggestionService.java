@@ -1,5 +1,6 @@
 package com.devskiller.services;
 
+import com.devskiller.exceptions.AppError;
 import com.devskiller.model.Author;
 import com.devskiller.model.Book;
 import com.devskiller.model.Genre;
@@ -9,7 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 class BookSuggestionService {
-	private final static int DEFAULT_RATING = 4;
+	private final int DEFAULT_RATING = 4;
 
 	private final Set<Book> books;
 	private final Set<Reader> readers;
@@ -21,7 +22,7 @@ class BookSuggestionService {
 
 	Set<String> suggestBooks(Reader reader) {
 		return books.stream()
-			.filter(book -> isRatingEqualOrHigherThan(book.rating(), DEFAULT_RATING))
+			.filter(book -> isRatingEqualOrHigherThanDefault(book.rating()))
 			.filter(book -> containsGenreInFavourites(reader, book.genre()))
 			.filter(book -> isBookInOtherFavouriteList(book, reader))
 			.map(Book::title)
@@ -29,9 +30,13 @@ class BookSuggestionService {
 	}
 
 	Set<String> suggestBooks(Reader reader, int rating) {
+		if (isNotValidRating(rating)) {
+			throw new AppError("Rating should be between 1 and 5");
+		}
+
 		return books.stream()
-			.filter(book -> book.rating() == rating)
-			.filter(book -> reader.favouriteGenres().contains(book.genre()))
+			.filter(book -> areEqualRatings(book.rating(), rating))
+			.filter(book -> containsGenreInFavourites(reader, book.genre()))
 			.filter(book -> isBookInOtherFavouriteList(book, reader))
 			.map(Book::title)
 			.collect(Collectors.toSet());
@@ -39,7 +44,7 @@ class BookSuggestionService {
 
 	Set<String> suggestBooks(Reader reader, Author author) {
 		return books.stream()
-			.filter(book -> isRatingEqualOrHigherThan(book.rating(), DEFAULT_RATING))
+			.filter(book -> isRatingEqualOrHigherThanDefault(book.rating()))
 			.filter(book -> containsGenreInFavourites(reader, book.genre()))
 			.filter(book -> isBookInOtherFavouriteList(book, reader))
 			.filter(book -> isBookWrittenBy(book, author))
@@ -67,15 +72,23 @@ class BookSuggestionService {
 		return reader.favouriteGenres().contains(genre);
 	}
 
-	private boolean isRatingEqualOrHigherThan(int bookRating, int rating) {
-		return bookRating >= rating;
+	private boolean isRatingEqualOrHigherThanDefault(int bookRating) {
+		return bookRating >= DEFAULT_RATING;
 	}
 
 	private boolean isBookInOtherFavouriteList(Book book, Reader reader ) {
 		return readers.stream()
-			.filter(currentReader -> isNotSameReader(reader, currentReader))
-			.filter(currentReader -> areReadersAgesEqual(reader, currentReader))
+			.filter(currentReader -> isNotSameReader(currentReader, reader))
+			.filter(currentReader -> areReadersAgesEqual(currentReader, reader))
 			.anyMatch(currentReader -> containsBookInFavourites(currentReader, book));
+	}
+
+	private boolean areEqualRatings(int bookRating, int rating) {
+		return bookRating == rating;
+	}
+
+	private boolean isNotValidRating(int rating) {
+		return rating < 1 || rating > 5;
 	}
 
 }
