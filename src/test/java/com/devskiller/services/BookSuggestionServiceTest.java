@@ -12,11 +12,16 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
-import static com.devskiller.model.Genre.*;
+import static com.devskiller.model.Genre.DRAMA;
+import static com.devskiller.model.Genre.FICTION;
+import static com.devskiller.model.Genre.HORROR;
+import static com.devskiller.model.Genre.ROMANTIC;
 import static com.google.common.collect.Sets.newHashSet;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
 import static org.apache.commons.lang3.RandomUtils.nextInt;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 
