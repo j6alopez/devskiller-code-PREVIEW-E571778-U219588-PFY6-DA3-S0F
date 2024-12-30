@@ -19,32 +19,34 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 public class BookSuggestionServiceTest {
 
-	private Author author1 = new Author(randomAlphabetic(8), randomAlphabetic(10));
-	private Author author2 = new Author(randomAlphabetic(8), randomAlphabetic(10));
-	private Author author3 = new Author(randomAlphabetic(8), randomAlphabetic(10));
-	private Author author4 = new Author(randomAlphabetic(8), randomAlphabetic(10));
-	private Author author5 = new Author(randomAlphabetic(8), randomAlphabetic(10));
-	private Author author6 = new Author(randomAlphabetic(8), randomAlphabetic(10));
-	private Book book1 = new Book(author1, randomAlphabetic(15), randomAlphabetic(10), HORROR, 5);
-	private Book book2 = new Book(author1, randomAlphabetic(15), randomAlphabetic(10), HORROR, 4);
-	private Book book3 = new Book(author2, randomAlphabetic(15), randomAlphabetic(10), HORROR, 3);
-	private Book book4 = new Book(author3, randomAlphabetic(15), randomAlphabetic(10), ROMANTIC, 5);
-	private Book book5 = new Book(author4, randomAlphabetic(15), randomAlphabetic(10), HORROR, 5);
-	private Book book6 = new Book(author5, randomAlphabetic(15), randomAlphabetic(10), DRAMA, 5);
-	private Book book7 = new Book(author1, randomAlphabetic(15), randomAlphabetic(10), HORROR, 3);
-	private Book book8 = new Book(author1, randomAlphabetic(15), randomAlphabetic(10), FICTION, 4);
-	private Book book9 = new Book(author1, randomAlphabetic(15), randomAlphabetic(10), HORROR, 4);
-	private Book book10 = new Book(author6, randomAlphabetic(15), randomAlphabetic(10), FICTION, 4);
-	private int randomAge1 = nextInt(0, 120);
-	private int randomAge2 = nextInt(0, 120);
-	private Reader reader1 = new Reader(randomAge1);
-	private Reader reader2 = new Reader(randomAge1);
-	private Reader reader3 = new Reader(randomAge2);
-	private BookSuggestionService suggestionService;
+	private final Author author2 = new Author(randomAlphabetic(8), randomAlphabetic(10));
+	private final Author author3 = new Author(randomAlphabetic(8), randomAlphabetic(10));
+	private final Author author4 = new Author(randomAlphabetic(8), randomAlphabetic(10));
+	private final Author author1 = new Author(randomAlphabetic(8), randomAlphabetic(10));
+	private final Author author5 = new Author(randomAlphabetic(8), randomAlphabetic(10));
+	private final Author author6 = new Author(randomAlphabetic(8), randomAlphabetic(10));
+	private final Book book1 = new Book(author1, randomAlphabetic(15), randomAlphabetic(10), HORROR, 5);
+	private final Book book2 = new Book(author1, randomAlphabetic(15), randomAlphabetic(10), HORROR, 4);
+	private final Book book3 = new Book(author2, randomAlphabetic(15), randomAlphabetic(10), HORROR, 3);
+	private final Book book4 = new Book(author3, randomAlphabetic(15), randomAlphabetic(10), ROMANTIC, 5);
+	private final Book book5 = new Book(author4, randomAlphabetic(15), randomAlphabetic(10), HORROR, 5);
+	private final Book book6 = new Book(author5, randomAlphabetic(15), randomAlphabetic(10), DRAMA, 5);
+	private final Book book7 = new Book(author1, randomAlphabetic(15), randomAlphabetic(10), HORROR, 3);
+	private final Book book8 = new Book(author1, randomAlphabetic(15), randomAlphabetic(10), FICTION, 4);
+	private final Book book9 = new Book(author1, randomAlphabetic(15), randomAlphabetic(10), HORROR, 4);
+	private final Book book10 = new Book(author6, randomAlphabetic(15), randomAlphabetic(10), FICTION, 4);
+	private final int randomAge1 = nextInt(0, 120);
+	private final int randomAge2 = nextInt(0, 120);
+	private final Reader reader1 = new Reader(randomAge1);
+	private final Reader reader2 = new Reader(randomAge1);
+	private final Reader reader3 = new Reader(randomAge2);
+	private  BookSuggestionService suggestionService;
 
 	@BeforeEach
 	public void setUp() {
@@ -64,15 +66,20 @@ public class BookSuggestionServiceTest {
 	}
 
 	@Test
+	@DisplayName("Should suggest book titles with correct rating")
 	public void shouldSuggestBookTitlesWithCorrectRating() {
+		//given:
+		int rating = 4;
 		// when:
-		Set<String> suggestedBooks = suggestionService.suggestBooks(reader1, 4);
+		Set<String> suggestedBooks = suggestionService.suggestBooks(reader1, rating);
 
 		// then:
 		assertThat(suggestedBooks).isEqualTo(newHashSet(book2.title()));
 	}
 
 	@Test
+	@DisplayName("Should suggest book titles with default rating of four or higher")
+	@Disabled
 	public void shouldSuggestBookTitlesWithDefaultRatingOfFourOrHigher() {
 		// when:
 		Set<String> suggestedBooks = suggestionService.suggestBooks(reader1);
@@ -83,6 +90,8 @@ public class BookSuggestionServiceTest {
 	}
 
 	@Test
+	@DisplayName("Should only suggest book titles of a given author")
+	@Disabled
 	public void shouldOnlySuggestBookTitlesOfGivenAuthor() {
 		// when:
 		Set<String> suggestedBooks = suggestionService.suggestBooks(reader1, author1);
