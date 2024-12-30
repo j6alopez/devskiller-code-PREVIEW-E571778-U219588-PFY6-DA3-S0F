@@ -21,14 +21,9 @@ class BookSuggestionService {
 
 	Set<String> suggestBooks(Reader reader) {
 		return books.stream()
-			.filter(book -> book.rating() >= DEFAULT_RATING)
+			.filter(book -> isRatingEqualOrHigherThan(book.rating(), DEFAULT_RATING))
 			.filter(book -> containsGenreInFavourites(reader, book.genre()))
-			.filter(book -> {
-				return readers.stream()
-					.filter(currentReader -> isNotSameReader(reader, currentReader))
-					.filter(currentReader -> areReadersAgesEqual(reader, currentReader))
-					.anyMatch(currentReader -> containsBookInFavourites(currentReader, book));
-			})
+			.filter(book -> isBookInOtherFavouriteList(book, reader))
 			.map(Book::title)
 			.collect(Collectors.toSet());
 	}
@@ -37,18 +32,23 @@ class BookSuggestionService {
 		return books.stream()
 			.filter(book -> book.rating() == rating)
 			.filter(book -> reader.favouriteGenres().contains(book.genre()))
-			.filter(book -> {
-				return readers.stream()
-					.filter(currentReader -> isNotSameReader(reader, currentReader))
-					.filter(currentReader -> areReadersAgesEqual(reader, currentReader))
-					.anyMatch(currentReader -> containsBookInFavourites(currentReader, book));
-			})
+			.filter(book -> isBookInOtherFavouriteList(book, reader))
 			.map(Book::title)
 			.collect(Collectors.toSet());
 	}
 
 	Set<String> suggestBooks(Reader reader, Author author) {
-		throw new UnsupportedOperationException(/*TODO*/);
+		return books.stream()
+			.filter(book -> isRatingEqualOrHigherThan(book.rating(), DEFAULT_RATING))
+			.filter(book -> containsGenreInFavourites(reader, book.genre()))
+			.filter(book -> isBookInOtherFavouriteList(book, reader))
+			.filter(book -> isBookWrittenBy(book, author))
+			.map(Book::title)
+			.collect(Collectors.toSet());
+	}
+
+	private boolean isBookWrittenBy(Book book, Author author) {
+		return book.author().equals(author);
 	}
 
 	private boolean containsBookInFavourites(Reader reader, Book book) {
@@ -65,6 +65,17 @@ class BookSuggestionService {
 
 	private boolean containsGenreInFavourites(Reader reader, Genre genre) {
 		return reader.favouriteGenres().contains(genre);
+	}
+
+	private boolean isRatingEqualOrHigherThan(int bookRating, int rating) {
+		return bookRating >= rating;
+	}
+
+	private boolean isBookInOtherFavouriteList(Book book, Reader reader ) {
+		return readers.stream()
+			.filter(currentReader -> isNotSameReader(reader, currentReader))
+			.filter(currentReader -> areReadersAgesEqual(reader, currentReader))
+			.anyMatch(currentReader -> containsBookInFavourites(currentReader, book));
 	}
 
 }

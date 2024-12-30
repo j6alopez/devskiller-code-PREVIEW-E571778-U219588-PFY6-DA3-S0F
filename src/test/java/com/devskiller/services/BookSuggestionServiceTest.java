@@ -6,7 +6,6 @@ import com.devskiller.model.Genre;
 import com.devskiller.model.Reader;
 import com.google.common.collect.Sets;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -89,7 +88,6 @@ public class BookSuggestionServiceTest {
 
     @Test
     @DisplayName("Should only suggest book titles of a given author")
-    @Disabled
     public void shouldOnlySuggestBookTitlesOfGivenAuthor() {
         // when:
         Set<String> suggestedBooks = suggestionService.suggestBooks(reader1, author1);
@@ -105,4 +103,5 @@ public class BookSuggestionServiceTest {
     private Book createBook(Author author, String title, Genre genre, int rating) {
         return new Book(author, title, randomAlphabetic(10), genre, rating);
     }
+
 }
