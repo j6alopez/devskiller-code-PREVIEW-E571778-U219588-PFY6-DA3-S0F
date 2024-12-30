@@ -1,5 +1,6 @@
 package com.devskiller.services;
 
+import com.devskiller.exceptions.AppError;
 import com.devskiller.model.Author;
 import com.devskiller.model.Book;
 import com.devskiller.model.Genre;
@@ -15,7 +16,9 @@ import static com.devskiller.model.Genre.*;
 import static com.google.common.collect.Sets.newHashSet;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
 import static org.apache.commons.lang3.RandomUtils.nextInt;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
 
 public class BookSuggestionServiceTest {
     private final Author author1 = createRandomAuthor(8, 10);
@@ -32,12 +35,12 @@ public class BookSuggestionServiceTest {
     private final Book book5 = createBook(author4, randomAlphabetic(15), HORROR, 5);
     private final Book book6 = createBook(author5, randomAlphabetic(15), DRAMA, 5);
     private final Book book7 = createBook(author1, randomAlphabetic(15), HORROR, 3);
-    private final Book book8 = createBook(author1, randomAlphabetic(15), FICTION, 4);
+    private final Book book8 = createBook(author1, randomAlphabetic(15), FICTION, 5);
     private final Book book9 = createBook(author1, randomAlphabetic(15), HORROR, 4);
     private final Book book10 = createBook(author6, randomAlphabetic(15), FICTION, 4);
 
-    private final int randomAge1 = nextInt(0, 120);
-    private final int randomAge2 = nextInt(0, 120);
+    private final int randomAge1 = nextInt(0, 70);
+    private final int randomAge2 = nextInt(71, 120);
 
     private final Reader reader1 = new Reader(randomAge1);
     private final Reader reader2 = new Reader(randomAge1);
@@ -49,51 +52,101 @@ public class BookSuggestionServiceTest {
     public void setUp() {
         reader1.addToFavourites(HORROR);
         reader1.addToFavourites(ROMANTIC);
-        reader2.addToFavourites(book2);
+
         reader2.addToFavourites(book1);
+        reader2.addToFavourites(book2);
         reader2.addToFavourites(book3);
         reader2.addToFavourites(book4);
         reader2.addToFavourites(book7);
         reader2.addToFavourites(book8);
+
+        reader2.addToFavourites(book6);
         reader2.addToFavourites(book10);
+
         reader3.addToFavourites(book5);
+
         Set<Book> books = Sets.newHashSet(book1, book2, book3, book4, book5, book6, book7, book8, book9, book10);
         Set<Reader> readers = newHashSet(reader1, reader2, reader3);
+
         suggestionService = new BookSuggestionService(books, readers);
     }
 
     @Test
-    @DisplayName("Should suggest book titles with correct rating")
-    public void shouldSuggestBookTitlesWithCorrectRating() {
-        //given:
-        int rating = 4;
+    @DisplayName("Should suggest book titles with exact rating")
+    public void shouldSuggestBookTitlesWithExactRating() {
+        final int rating = 4;
+        final Set<String> expectedBooks = newHashSet(book2.title());
+
         // when:
-        Set<String> suggestedBooks = suggestionService.suggestBooks(reader1, rating);
+        final Set<String> suggestedBooks = suggestionService.suggestBooks(reader1, rating);
 
         // then:
-        assertThat(suggestedBooks).isEqualTo(newHashSet(book2.title()));
+        assertThat(suggestedBooks).isEqualTo(expectedBooks);
+
+    }
+
+    @Test
+    @DisplayName("Should throw exception for invalid rating")
+    public void shouldThrowExceptionInvalidRating() {
+        final int rating =  nextInt(6, 10);;
+
+        // then:
+        assertThatThrownBy(() -> suggestionService.suggestBooks(reader1, rating))
+                .isInstanceOf(AppError.class);
+
+    }
+
+    @Test
+    @DisplayName("Should suggest book titles with favourite genres")
+    public void shouldSuggestBooksWithOnlyFavouriteGenres() {
+        final int rating = 5;
+
+        // when:
+        final Set<String> suggestedBooks = suggestionService.suggestBooks(reader1, rating);
+        final Set<String> expectedBooks = newHashSet(book4.title(), book1.title());
+
+        // then:
+        assertAll(
+                () -> assertThat(suggestedBooks).doesNotContain(book8.title()),
+                () -> assertThat(suggestedBooks).isEqualTo(expectedBooks)
+        );
+
+    }
+
+    @Test
+    @DisplayName("Should return empty set when no matching books")
+    public void shouldReturnEmptySetForNoRating() {
+        final int rating = 2;
+
+        // when:
+        final Set<String> suggestedBooks = suggestionService.suggestBooks(reader1, rating);
+
+        // then:
+        assertThatCode(() -> assertThat(suggestedBooks).isEmpty()).doesNotThrowAnyException();
 
     }
 
     @Test
     @DisplayName("Should suggest book titles with default rating of four or higher")
     public void shouldSuggestBookTitlesWithDefaultRatingOfFourOrHigher() {
+        final Set<String> expectedBooks = newHashSet(book1.title(), book2.title(), book4.title());
+
         // when:
-        Set<String> suggestedBooks = suggestionService.suggestBooks(reader1);
+        final Set<String> suggestedBooks = suggestionService.suggestBooks(reader1);
 
 		// then:
-		assertThat(suggestedBooks).isEqualTo(newHashSet(book1.title(), book2.title(),
-				book4.title()));
+		assertThat(suggestedBooks).isEqualTo(expectedBooks);
 	}
 
     @Test
     @DisplayName("Should only suggest book titles of a given author")
     public void shouldOnlySuggestBookTitlesOfGivenAuthor() {
+        final Set<String> expectedBooks = newHashSet(book1.title(), book2.title());
         // when:
-        Set<String> suggestedBooks = suggestionService.suggestBooks(reader1, author1);
+        final Set<String> suggestedBooks = suggestionService.suggestBooks(reader1, author1);
 
         // then:
-        assertThat(suggestedBooks).isEqualTo(newHashSet(book1.title(), book2.title()));
+        assertThat(suggestedBooks).isEqualTo(expectedBooks);
     }
 
     private Author createRandomAuthor(int firstNameLength, int lastNameLength) {
