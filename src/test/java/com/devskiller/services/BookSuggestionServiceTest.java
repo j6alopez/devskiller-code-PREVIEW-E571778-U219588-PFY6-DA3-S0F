@@ -3,17 +3,23 @@ package com.devskiller.services;
 import com.devskiller.model.Author;
 import com.devskiller.model.Book;
 import com.devskiller.model.Reader;
-import org.junit.Before;
-import org.junit.Test;
+
+import static com.google.common.collect.Sets.newHashSet;
+
+import com.google.common.collect.Sets;
+
 
 import java.util.Set;
 
 import static com.devskiller.model.Genre.*;
-import static com.google.common.collect.Sets.newHashSet;
+
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
 import static org.apache.commons.lang3.RandomUtils.nextInt;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class BookSuggestionServiceTest {
 
@@ -40,7 +46,7 @@ public class BookSuggestionServiceTest {
 	private Reader reader3 = new Reader(randomAge2);
 	private BookSuggestionService suggestionService;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		reader1.addToFavourites(HORROR);
 		reader1.addToFavourites(ROMANTIC);
@@ -52,7 +58,7 @@ public class BookSuggestionServiceTest {
 		reader2.addToFavourites(book8);
 		reader2.addToFavourites(book10);
 		reader3.addToFavourites(book5);
-		Set<Book> books = newHashSet(book1, book2, book3, book4, book5, book6, book7, book8, book9, book10);
+		Set<Book> books = Sets.newHashSet(book1, book2, book3, book4, book5, book6, book7, book8, book9, book10);
 		Set<Reader> readers = newHashSet(reader1, reader2, reader3);
 		suggestionService = new BookSuggestionService(books, readers);
 	}
